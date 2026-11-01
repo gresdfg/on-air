@@ -38,7 +38,7 @@ node server.mjs
 
 打开 http://localhost:7788 。
 
-**Windows 上**还可以双击 `ON AIR.vbs`：后台起服务，开一个没有地址栏的独立窗口。想让同一 Wi-Fi 下的手机也能打开，双击 `手机访问.cmd`（监听 `0.0.0.0:7790`，首次需要在防火墙里放行）。
+**Windows 上**还可以双击 `ON AIR.vbs`：后台起服务，开一个没有地址栏的独立窗口。
 
 ## 配置项
 
@@ -62,12 +62,10 @@ config.example.json 配置模板
 public/             前端（index.html / app.js / style.css / puzzle-bg.js）
 design/             设计过程的小样（拼图、小人、脚印、轨道等方向）
 ON AIR.vbs          Windows 启动器：无黑窗起服务 + 独立窗口
-手机访问.cmd        让局域网设备访问（0.0.0.0:7790）
 ```
 
 ## 已知限制
 
-- **手机访问**：同 Wi-Fi 下需要在防火墙放行端口；实测 iPhone 热点下，热点主机访问不到挂在其下的设备
 - **BreezeBlue 地域限制**：从中国大陆直连会被限流（429 / 连接超时），用 `voice.proxy` 指到境外出口
 - **浏览器要求**：页面用容器查询单位做等比缩放，需要 Chrome/Edge 105+、iOS Safari 16+
 - 回答内容与音频会经过你配置的模型与 TTS 服务商，注意各自的隐私条款
