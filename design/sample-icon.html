@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<title>图标小样</title>
+<style>
+  html, body { margin: 0; height: 100%; }
+  body {
+    background: #E7DFD2;
+    font-family: Georgia, "FangSong", SimSun, serif;
+    color: #3B342C;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 26px 40px;
+    flex-wrap: wrap;
+    padding: 20px;
+    max-width: 660px;
+    margin: 0 auto;
+  }
+  figure { margin: 0; text-align: center; }
+  svg { display: block; border-radius: 18px; }
+  figcaption {
+    margin-top: 10px;
+    font-size: 13px;
+    letter-spacing: 0.04em;
+    color: rgba(59, 52, 44, 0.65);
+  }
+</style>
+</head>
+<body>
+  <figure><div id="a"></div><figcaption>A · 光球</figcaption></figure>
+  <figure><div id="b"></div><figcaption>B · 拼图块</figcaption></figure>
+  <figure><div id="c"></div><figcaption>C · 小人</figcaption></figure>
+  <figure><div id="d"></div><figcaption>D · 拼图 + 小人</figcaption></figure>
+
+<script>
+const S = 240;
+const GOLD = '#D9A05C';
+const CRE = '#CE8A6D';
+const EYE = '#3E322B';
+
+function wrap(id, inner) {
+  document.getElementById(id).innerHTML = `<svg width="${S}" height="${S}" viewBox="0 0 ${S} ${S}">
+    <defs>
+      <radialGradient id="core${id}" cx="50%" cy="46%" r="50%">
+        <stop offset="0%" stop-color="#FFE7AC"/>
+        <stop offset="34%" stop-color="#ECA23B"/>
+        <stop offset="100%" stop-color="rgba(233,162,59,0)"/>
+      </radialGradient>
+      <radialGradient id="bg${id}" cx="50%" cy="42%" r="62%">
+        <stop offset="0%" stop-color="#FBF6EA"/>
+        <stop offset="100%" stop-color="#E9DFCC"/>
+      </radialGradient>
+    </defs>
+    <rect width="${S}" height="${S}" rx="44" fill="url(#bg${id})"/>
+    ${inner}
+  </svg>`;
+}
+
+function creature(cx, cy, s) {
+  return `<g transform="translate(${cx} ${cy}) scale(${s})">
+    <ellipse cx="0" cy="13.2" rx="9" ry="2.4" fill="rgba(120,90,60,0.16)"/>
+    <g fill="${CRE}">
+      <rect x="-7.6" y="-6" width="15.2" height="12" rx="2.2"/>
+      <rect x="-11.6" y="-1.6" width="4.4" height="3.6" rx="1.4"/>
+      <rect x="7.2" y="-1.6" width="4.4" height="3.6" rx="1.4"/>
+      <rect x="-5.6" y="6" width="3.4" height="6.4" rx="1.5"/>
+      <rect x="-1.7" y="6" width="3.4" height="6.4" rx="1.5"/>
+      <rect x="2.2" y="6" width="3.4" height="6.4" rx="1.5"/>
+    </g>
+    <rect x="-6.4" y="-5.2" width="12.8" height="3.6" rx="1.8" fill="#fff" opacity="0.16"/>
+    <g fill="${EYE}">
+      <rect x="-4.9" y="-2.6" width="3" height="3" rx="0.8"/>
+      <rect x="1.9" y="-2.6" width="3" height="3" rx="0.8"/>
+    </g>
+  </g>`;
+}
+
+// A 光球
+{
+  const c = S / 2;
+  let s = `<circle cx="${c}" cy="${c}" r="92" fill="url(#corea)" opacity="0.95"/>`;
+  s += `<ellipse cx="${c}" cy="${c}" rx="84" ry="30" transform="rotate(-20 ${c} ${c})" fill="none" stroke="${GOLD}" stroke-width="3.4" opacity="0.75"/>`;
+  s += `<ellipse cx="${c}" cy="${c}" rx="68" ry="25" transform="rotate(34 ${c} ${c})" fill="none" stroke="${GOLD}" stroke-width="2.6" opacity="0.55"/>`;
+  s += `<ellipse cx="${c}" cy="${c}" rx="54" ry="20" transform="rotate(76 ${c} ${c})" fill="none" stroke="${GOLD}" stroke-width="2.2" opacity="0.4"/>`;
+  s += `<circle cx="${c}" cy="${c}" r="30" fill="#ECA23B"/>`;
+  s += `<circle cx="${c}" cy="${c}" r="19" fill="#F6B24F"/>`;
+  wrap('a', s);
+}
+
+// B 拼图块
+{
+  const c = S / 2;
+  const piece = `M ${c - 62} ${c - 52} L ${c - 20} ${c - 52}
+    C ${c - 20} ${c - 74} ${c + 20} ${c - 74} ${c + 20} ${c - 52}
+    L ${c + 62} ${c - 52} L ${c + 62} ${c - 8}
+    C ${c + 84} ${c - 8} ${c + 84} ${c + 26} ${c + 62} ${c + 26}
+    L ${c + 62} ${c + 54} L ${c - 62} ${c + 54} L ${c - 62} ${c + 26}
+    C ${c - 84} ${c + 26} ${c - 84} ${c - 8} ${c - 62} ${c - 8} Z`;
+  let s = `<path d="${piece}" fill="#F7F1E4" stroke="rgba(59,52,44,0.12)" stroke-width="2"/>`;
+  s += `<circle cx="${c}" cy="${c + 4}" r="46" fill="url(#coreb)" opacity="0.9"/>`;
+  s += `<circle cx="${c}" cy="${c + 4}" r="15" fill="#E89E34"/>`;
+  wrap('b', s);
+}
+
+// C 小人
+{
+  wrap('c', creature(S / 2, S / 2 - 4, 6.4));
+}
+
+// D 拼图 + 小人
+{
+  const c = S / 2;
+  const piece = `M ${c - 62} ${c - 54} L ${c - 20} ${c - 54}
+    C ${c - 20} ${c - 76} ${c + 20} ${c - 76} ${c + 20} ${c - 54}
+    L ${c + 62} ${c - 54} L ${c + 62} ${c - 10}
+    C ${c + 84} ${c - 10} ${c + 84} ${c + 24} ${c + 62} ${c + 24}
+    L ${c + 62} ${c + 52} L ${c - 62} ${c + 52} L ${c - 62} ${c + 24}
+    C ${c - 84} ${c + 24} ${c - 84} ${c - 10} ${c - 62} ${c - 10} Z`;
+  let s = `<path d="${piece}" fill="#F7F1E4" stroke="rgba(59,52,44,0.12)" stroke-width="2"/>`;
+  s += creature(c, c + 2, 4.2);
+  wrap('d', s);
+}
+
+// SMALL：小尺寸预览
+const strip = document.createElement('div');
+strip.style.cssText = 'display:flex;gap:26px;justify-content:center;align-items:flex-end;width:100%;margin-top:6px';
+['a','b','c','d'].forEach((id) => {
+  const col = document.createElement('div');
+  col.style.cssText = 'display:flex;gap:10px;align-items:flex-end';
+  [48, 32, 16].forEach((px) => {
+    const src = document.querySelector('#' + id + ' svg');
+    const svg = src.cloneNode(true);
+    svg.setAttribute('width', px);
+    svg.setAttribute('height', px);
+    svg.style.borderRadius = Math.round(px * 0.18) + 'px';
+    col.appendChild(svg);
+  });
+  strip.appendChild(col);
+});
+document.body.appendChild(strip);
+</script>
+</body>
+</html>
