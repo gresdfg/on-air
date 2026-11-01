@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<title>轨道环 · 小样</title>
+<style>
+  html, body { margin: 0; height: 100%; }
+  body {
+    background: #F6F0E4;
+    font-family: Georgia, "FangSong", SimSun, serif;
+    color: #3B342C;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 26px 34px;
+    flex-wrap: wrap;
+    padding: 18px;
+    max-width: 640px;
+    margin: 0 auto;
+  }
+  figure { margin: 0; text-align: center; }
+  svg { display: block; }
+  figcaption {
+    margin-top: 9px;
+    font-size: 12.5px;
+    line-height: 1.5;
+    color: rgba(59, 52, 44, 0.62);
+  }
+</style>
+</head>
+<body>
+  <figure><div id="a"></div><figcaption>A · 三圈倾斜轨道</figcaption></figure>
+  <figure><div id="b"></div><figcaption>B · 轨道 + 虚线轨迹 + 光点</figcaption></figure>
+  <figure><div id="c"></div><figcaption>C · 轨道 + 外圈虚线</figcaption></figure>
+
+<script>
+const S = 240;
+const GOLD = '#D9A05C';
+const GOLD_SOFT = 'rgba(217,160,92,0.55)';
+const GOLD_FAINT = 'rgba(217,160,92,0.28)';
+
+function frame(id, inner) {
+  document.getElementById(id).innerHTML = `<svg width="${S}" height="${S}" viewBox="0 0 ${S} ${S}">
+    <defs>
+      <radialGradient id="core${id}">
+        <stop offset="0%" stop-color="#FFE7AC"/>
+        <stop offset="38%" stop-color="#ECA23B"/>
+        <stop offset="100%" stop-color="rgba(233,162,59,0)"/>
+      </radialGradient>
+      <radialGradient id="halo${id}">
+        <stop offset="0%" stop-color="rgba(246,196,118,0.45)"/>
+        <stop offset="100%" stop-color="rgba(246,196,118,0)"/>
+      </radialGradient>
+    </defs>
+    ${inner}
+  </svg>`;
+}
+
+function core(c, r) {
+  return `<circle cx="${c}" cy="${c}" r="${r * 0.9}" fill="url(#core${'x'})" opacity="0"/>`;
+}
+
+// 椭圆轨道
+function orbit(c, rx, ry, rot, opts = {}) {
+  const dash = opts.dash ? `stroke-dasharray="${opts.dash}"` : '';
+  const op = opts.opacity ?? 0.8;
+  return `<ellipse cx="${c}" cy="${c}" rx="${rx}" ry="${ry}" transform="rotate(${rot} ${c} ${c})"
+    fill="none" stroke="${opts.color || GOLD}" stroke-width="${opts.w || 1.2}" ${dash}
+    stroke-linecap="round" opacity="${op}" ${opts.extra || ''}/>`;
+}
+
+function dots(c, rx, ry, rot, n, size, color) {
+  let s = '';
+  for (let i = 0; i < n; i++) {
+    const a = (i / n) * Math.PI * 2;
+    const x = Math.cos(a) * rx;
+    const y = Math.sin(a) * ry;
+    const rad = (rot * Math.PI) / 180;
+    const px = c + x * Math.cos(rad) - y * Math.sin(rad);
+    const py = c + x * Math.sin(rad) + y * Math.cos(rad);
+    s += `<circle cx="${px.toFixed(1)}" cy="${py.toFixed(1)}" r="${size}" fill="${color}"/>`;
+  }
+  return s;
+}
+
+// A · 三圈实线
+{
+  const c = S / 2;
+  let s = `<circle cx="${c}" cy="${c}" r="104" fill="url(#haloA)"/>`;
+  s += orbit(c, 92, 33, -20, { opacity: 0.6 });
+  s += orbit(c, 84, 30, 28, { opacity: 0.5 });
+  s += orbit(c, 74, 27, 68, { opacity: 0.42 });
+  s += orbit(c, 63, 24, -62, { opacity: 0.34 });
+  s += orbit(c, 54, 20, 8, { opacity: 0.26 });
+  s += `<circle cx="${c}" cy="${c}" r="15" fill="url(#coreA)"/><circle cx="${c}" cy="${c}" r="7" fill="#E89E34"/>`;
+  frame('a', s);
+}
+
+// B · 实线 + 虚线轨迹 + 光点
+{
+  const c = S / 2;
+  let s = `<circle cx="${c}" cy="${c}" r="106" fill="url(#haloB)"/>`;
+  s += orbit(c, 94, 34, -20, { opacity: 0.55 });
+  s += orbit(c, 85, 30, 28, { opacity: 0.45, dash: '1 3', color: GOLD_SOFT, w: 1.1 });
+  s += orbit(c, 75, 27, 68, { opacity: 0.36, dash: '1 4' });
+  s += orbit(c, 64, 24, -62, { opacity: 0.28, dash: '1 5' });
+  s += orbit(c, 55, 20, 8, { opacity: 0.22 });
+  s += dots(c, 94, 34, -20, 3, 2.4, GOLD);
+  s += dots(c, 85, 30, 28, 6, 1.8, GOLD_SOFT);
+  s += dots(c, 75, 27, 68, 5, 1.6, GOLD_FAINT);
+  s += dots(c, 64, 24, -62, 4, 1.4, GOLD_FAINT);
+  s += `<circle cx="${c}" cy="${c}" r="15" fill="url(#coreB)"/><circle cx="${c}" cy="${c}" r="7" fill="#E89E34"/>`;
+  frame('b', s);
+}
+
+// C · 轨道 + 外圈虚线（和现在的虚线环呼应）
+{
+  const c = S / 2;
+  let s = `<circle cx="${c}" cy="${c}" r="104" fill="url(#haloC)"/>`;
+  s += `<circle cx="${c}" cy="${c}" r="96" fill="none" stroke="${GOLD_FAINT}" stroke-width="1" stroke-dasharray="1 7"/>`;
+  s += orbit(c, 86, 31, -24, { opacity: 0.5 });
+  s += orbit(c, 76, 27, 28, { opacity: 0.4, dash: '1 4' });
+  s += orbit(c, 66, 24, 82, { opacity: 0.3 });
+  s += orbit(c, 56, 21, -66, { opacity: 0.24 });
+  s += dots(c, 82, 29, -24, 4, 1.8, GOLD);
+  s += `<circle cx="${c}" cy="${c}" r="14" fill="url(#coreC)"/><circle cx="${c}" cy="${c}" r="6.5" fill="#E89E34"/>`;
+  frame('c', s);
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<title>背景小样</title>
+<style>
+  html, body { margin: 0; height: 100%; }
+  body {
+    background: #6E665C;
+    font-family: Georgia, "FangSong", SimSun, serif;
+    color: #EDE6D8;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 18px;
+    flex-wrap: wrap;
+    padding: 16px;
+  }
+  figure { margin: 0; text-align: center; }
+  .panel {
+    width: 300px;
+    height: 533px;
+    border-radius: 2px;
+    overflow: hidden;
+    box-shadow: 0 18px 46px rgba(0, 0, 0, 0.35);
+    position: relative;
+  }
+  figcaption {
+    margin-top: 10px;
+    font-size: 13px;
+    letter-spacing: 0.12em;
+    color: rgba(237, 230, 216, 0.72);
+  }
+  .panel svg { width: 100%; height: auto; display: block; }
+</style>
+</head>
+<body>
+  <figure><div class="panel" id="p1"></div><figcaption id="cap"></figcaption></figure>
+
+<script src="sample-creature.js"></script>
+<script>
+function rng(seed) {
+  let a = seed >>> 0;
+  return () => {
+    a |= 0; a = (a + 0x6d2b79f5) | 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+const TONES = ['#F8F3E8', '#F4EEE1', '#F0E9DA', '#EDE4D3', '#F7F1E4', '#EFE7D6'];
+
+function edgePath(x0, y0, x1, y1, sign) {
+  const dx = x1 - x0, dy = y1 - y0;
+  const L = Math.hypot(dx, dy);
+  const ux = dx / L, uy = dy / L;
+  const nx = -uy, ny = ux;
+  const amp = 0.155 * L * sign;
+  const at = (t, off) => [x0 + ux * L * t + nx * off, y0 + uy * L * t + ny * off];
+  const [ax, ay] = at(0.38, 0);
+  const [c1x, c1y] = at(0.44, amp);
+  const [c2x, c2y] = at(0.56, amp);
+  const [bx, by] = at(0.62, 0);
+  return `L ${ax.toFixed(2)} ${ay.toFixed(2)} C ${c1x.toFixed(2)} ${c1y.toFixed(2)} ${c2x.toFixed(2)} ${c2y.toFixed(2)} ${bx.toFixed(2)} ${by.toFixed(2)} L ${x1.toFixed(2)} ${y1.toFixed(2)}`;
+}
+
+function jigsaw(w, h, cols, rows, seed) {
+  const rand = rng(seed);
+  const cw = w / cols, ch = h / rows;
+  const vEdge = {};   // 垂直分隔线 (c,r) 的凸起方向
+  const hEdge = {};   // 水平分隔线 (c,r)
+  const pieces = [];
+
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      const x0 = c * cw, y0 = r * ch, x1 = x0 + cw, y1 = y0 + ch;
+      let d = `M ${x0.toFixed(2)} ${y0.toFixed(2)}`;
+
+      // 上边
+      if (r === 0) d += ` L ${x1} ${y0}`;
+      else {
+        const k = `h${r}-${c}`;
+        if (!(k in hEdge)) hEdge[k] = (rand() < 0.5 ? 1 : -1) * -1;
+        d += ' ' + edgePath(x0, y0, x1, y0, hEdge[k]);
+      }
+      // 右边
+      if (c === cols - 1) d += ` L ${x1} ${y1}`;
+      else {
+        const k = `v${r}-${c}`;
+        if (!(k in vEdge)) vEdge[k] = (rand() < 0.5 ? 1 : -1);
+        d += ' ' + edgePath(x1, y0, x1, y1, vEdge[k]);
+      }
+      // 下边（反向）
+      if (r === rows - 1) d += ` L ${x0} ${y1}`;
+      else {
+        const k = `h${r + 1}-${c}`;
+        if (!(k in hEdge)) hEdge[k] = (rand() < 0.5 ? 1 : -1) * -1;
+        d += ' ' + edgePath(x1, y1, x0, y1, hEdge[k] * -1);
+      }
+      // 左边（反向）
+      if (c === 0) d += ` L ${x0} ${y0}`;
+      else {
+        const k = `v${r}-${c - 1}`;
+        if (!(k in vEdge)) vEdge[k] = (rand() < 0.5 ? 1 : -1);
+        d += ' ' + edgePath(x0, y1, x0, y0, vEdge[k] * -1);
+      }
+
+      pieces.push({ d: d + ' Z', cx: (x0 + x1) / 2, cy: (y0 + y1) / 2, c, r, tone: TONES[Math.floor(rand() * TONES.length)] });
+    }
+  }
+  return { pieces, cw, ch };
+}
+
+function buildJigsawPanel(el, opts) {
+  const W = 260, H = 462;
+  const { pieces } = jigsaw(W, H, opts.cols, opts.rows, opts.seed);
+  const holeIndex = opts.hole ? Math.floor(pieces.length / 2) : -1;
+  const liftIndex = opts.lift ? Math.floor(pieces.length * 0.62) : -1;
+
+  let inner = '';
+  pieces.forEach((p, i) => {
+    if (i === holeIndex) return;
+    const lifted = i === liftIndex;
+    inner += `<path d="${p.d}" fill="${p.tone}" stroke="rgba(59,52,44,0.07)" stroke-width="0.8"${
+      lifted ? ' transform="translate(10,-16) rotate(-2.5 ' + p.cx + ' ' + p.cy + ')" filter="url(#sh)"' : ''
+    }/>`;
+  });
+
+  const hole = holeIndex >= 0 ? `<path d="${pieces[holeIndex].d}" fill="#E7DECC" stroke="rgba(59,52,44,0.12)" stroke-width="1"/>
+    <path d="${pieces[holeIndex].d}" fill="none" stroke="rgba(59,52,44,0.18)" stroke-width="6" filter="url(#blur)"/>` : '';
+
+  el.innerHTML = `<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">
+    <defs>
+      <filter id="sh" x="-30%" y="-30%" width="160%" height="160%">
+        <feDropShadow dx="0" dy="6" stdDeviation="7" flood-color="rgba(60,48,32,0.28)"/>
+      </filter>
+      <filter id="blur" x="-30%" y="-30%" width="160%" height="160%">
+        <feGaussianBlur stdDeviation="5"/>
+      </filter>
+      <radialGradient id="glow" cx="50%" cy="50%" r="50%">
+        <stop offset="0%" stop-color="rgba(232,163,61,0.30)"/>
+        <stop offset="100%" stop-color="rgba(232,163,61,0)"/>
+      </radialGradient>
+    </defs>
+    <rect width="${W}" height="${H}" fill="#F6F0E4"/>
+    ${inner}
+    ${hole}
+    ${opts.glow && holeIndex >= 0 ? `<circle cx="${pieces[holeIndex].cx}" cy="${pieces[holeIndex].cy}" r="86" fill="url(#glow)"/>` : ''}
+  </svg>`;
+}
+
+function buildMosaic(el) {
+  const W = 260, H = 462;
+  const rand = rng(77);
+  const cols = [30, 46, 38, 52, 44, 50];
+  let y = 0, out = '';
+  const rows = [];
+  for (let i = 0; i < 12; i++) rows.push(26 + Math.floor(rand() * 26));
+
+  rows.forEach((h) => {
+    let x = 0;
+    let i = 0;
+    while (x < W) {
+      let w = cols[i % cols.length] + Math.floor(rand() * 18);
+      if (x + w > W) w = W - x;
+      const tone = TONES[Math.floor(rand() * TONES.length)];
+      out += `<rect x="${x}" y="${y}" width="${w - 2}" height="${h - 2}" rx="1.5" fill="${tone}" stroke="rgba(59,52,44,0.06)" stroke-width="0.6"/>`;
+      x += w;
+      i++;
+    }
+    y += h;
+  });
+
+  el.innerHTML = `<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">
+    <rect width="${W}" height="${H}" fill="#EFE7D6"/>
+    ${out}
+  </svg>`;
+}
+
+const v = (new URLSearchParams(location.search).get('v') || 'a').toLowerCase();
+const cap = document.getElementById('cap');
+if (v === 'a') { buildJigsawPanel(document.getElementById('p1'), { cols: 4, rows: 7, seed: 11, hole: true, glow: true }); cap.textContent = 'A · 拼图，中心缺一块'; }
+else if (v === 'b') { buildJigsawPanel(document.getElementById('p1'), { cols: 4, rows: 7, seed: 23, lift: true }); cap.textContent = 'B · 拼图，浮起一块'; }
+else if (v === 'e') { buildPuzzleCreatures(document.getElementById('p1'), { cols: 4, rows: 7, seed: 11, hole: true, scale: 0.8 }); cap.textContent = 'E · 拼图里的小人'; }
+else if (v === 'e2') { buildPuzzleCreatures(document.getElementById('p1'), { cols: 3, rows: 5, seed: 11, hole: true, scale: 1.25 }); cap.textContent = 'E2 · 三列五行的放大版'; }
+else { buildMosaic(document.getElementById('p1')); cap.textContent = 'C · 矩形马赛克'; }
+</script>
+</body>
+</html>

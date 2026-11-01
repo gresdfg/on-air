@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<title>小人 × 光球 · 小样</title>
+<style>
+  html, body { margin: 0; height: 100%; }
+  body {
+    background: #F6F0E4;
+    font-family: Georgia, "FangSong", SimSun, serif;
+    color: #3B342C;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 30px 40px;
+    flex-wrap: wrap;
+    padding: 18px;
+    max-width: 640px;
+    margin: 0 auto;
+  }
+  figure { margin: 0; text-align: center; }
+  svg { display: block; }
+  figcaption {
+    margin-top: 10px;
+    font-size: 13px;
+    line-height: 1.5;
+    letter-spacing: 0.04em;
+    color: rgba(59, 52, 44, 0.62);
+  }
+</style>
+</head>
+<body>
+  <figure><div id="a"></div><figcaption>A · 小人站在光球中心</figcaption></figure>
+  <figure><div id="b"></div><figcaption>B · 小人在刻度环上巡边</figcaption></figure>
+  <figure><div id="c"></div><figcaption>C · 小人推着刻度环</figcaption></figure>
+  <figure><div id="d"></div><figcaption>D · 刻度变成它的脚印</figcaption></figure>
+
+<script>
+const S = 230;
+const CRE = '#CE8A6D';
+const EYE = '#4A3A30';
+const TICK = '#DFA65E';
+
+function ticks(cx, cy, r0, r1, n, w = 1.6, color = TICK) {
+  let s = '';
+  for (let i = 0; i < n; i++) {
+    const a = (i / n) * Math.PI * 2 - Math.PI / 2;
+    s += `<line x1="${(cx + Math.cos(a) * r0).toFixed(1)}" y1="${(cy + Math.sin(a) * r0).toFixed(1)}"
+      x2="${(cx + Math.cos(a) * r1).toFixed(1)}" y2="${(cy + Math.sin(a) * r1).toFixed(1)}"
+      stroke="${color}" stroke-width="${w}" stroke-linecap="round"/>`;
+  }
+  return s;
+}
+
+function creature(cx, cy, s, opts = {}) {
+  const arm = opts.arms || 'side';
+  const legs = opts.legs || 'three';
+  let g = `<g transform="translate(${cx} ${cy}) scale(${s})" fill="${CRE}">`;
+  g += `<rect x="-8" y="-6" width="16" height="12" rx="1"/>`;
+  if (arm === 'side') g += `<rect x="-13" y="-2" width="5" height="4"/><rect x="8" y="-2" width="5" height="4"/>`;
+  if (arm === 'push') g += `<rect x="6" y="-3" width="7" height="4"/><rect x="6" y="1" width="7" height="4"/>`;
+  if (arm === 'up') g += `<rect x="-12" y="-8" width="4" height="6"/><rect x="8" y="-8" width="4" height="6"/>`;
+  if (legs === 'three') g += `<rect x="-6" y="6" width="4" height="6"/><rect x="-2" y="6" width="4" height="6"/><rect x="2" y="6" width="4" height="6"/>`;
+  if (legs === 'two') g += `<rect x="-5" y="6" width="4" height="6"/><rect x="1" y="6" width="4" height="6"/>`;
+  g += `<rect x="-5" y="-3" width="3" height="3" fill="${EYE}"/><rect x="2" y="-3" width="3" height="3" fill="${EYE}"/>`;
+  g += '</g>';
+  return g;
+}
+
+function frame(id, inner, defs = '') {
+  document.getElementById(id).innerHTML = `<svg width="${S}" height="${S}" viewBox="0 0 ${S} ${S}">
+    <defs>
+      <radialGradient id="glow${id}">
+        <stop offset="0%" stop-color="rgba(246,190,110,0.85)"/>
+        <stop offset="45%" stop-color="rgba(244,186,110,0.35)"/>
+        <stop offset="100%" stop-color="rgba(244,186,110,0)"/>
+      </radialGradient>
+      ${defs}
+    </defs>
+    ${inner}
+  </svg>`;
+}
+
+// A · 站在中心
+{
+  const c = S / 2;
+  let s = `<circle cx="${c}" cy="${c}" r="86" fill="url(#glowa)"/>`;
+  s += ticks(c, c, 74, 96, 56, 1.6);
+  s += `<circle cx="${c}" cy="${c}" r="58" fill="none" stroke="rgba(200,170,135,0.25)"/>`;
+  s += creature(c, c + 2, 2.4);
+  frame('a', s);
+}
+
+// B · 站在环上（底部）
+{
+  const c = S / 2, R = 78;
+  let s = `<circle cx="${c}" cy="${c}" r="70" fill="url(#glowb)"/>`;
+  s += ticks(c, c, R, R + 16, 60, 1.6);
+  s += `<circle cx="${c}" cy="${c}" r="${R}" fill="none" stroke="rgba(200,170,135,0.35)"/>`;
+  s += creature(c, c + R - 8, 1.7);
+  s += `<circle cx="${c}" cy="${c}" r="7" fill="#E89E34"/>`;
+  frame('b', s);
+}
+
+// C · 推着环
+{
+  const c = S / 2, R = 74;
+  let s = `<circle cx="${c}" cy="${c}" r="64" fill="url(#glowc)"/>`;
+  s += ticks(c, c, R, R + 15, 56, 1.6);
+  s += `<circle cx="${c}" cy="${c}" r="${R}" fill="none" stroke="rgba(200,170,135,0.35)"/>`;
+  s += `<circle cx="${c}" cy="${c}" r="6" fill="#E89E34"/>`;
+  s += creature(c + R + 16, c + 4, 1.9, { arms: 'push', legs: 'two' });
+  s += `<line x1="${c + R + 34}" y1="${c - 8}" x2="${c + R + 42}" y2="${c - 8}" stroke="rgba(200,170,135,0.5)" stroke-width="1.4" stroke-linecap="round"/>`;
+  s += `<line x1="${c + R + 34}" y1="${c + 2}" x2="${c + R + 46}" y2="${c + 2}" stroke="rgba(200,170,135,0.35)" stroke-width="1.4" stroke-linecap="round"/>`;
+  frame('c', s);
+}
+
+// D · 脚印刻度
+{
+  const c = S / 2, R = 78;
+  let s = `<circle cx="${c}" cy="${c}" r="66" fill="url(#glowd)"/>`;
+  for (let i = 0; i < 40; i++) {
+    const a = (i / 40) * Math.PI * 2 - Math.PI / 2;
+    const rr = R + (i % 2 ? 5 : -3);
+    const x = c + Math.cos(a) * rr;
+    const y = c + Math.sin(a) * rr;
+    const rot = (a * 180) / Math.PI + 90;
+    s += `<g transform="translate(${x.toFixed(1)} ${y.toFixed(1)}) rotate(${rot.toFixed(1)})" opacity="0.85">
+      <rect x="-2.6" y="-1.4" width="5.2" height="2.8" rx="1.2" fill="${TICK}"/></g>`;
+  }
+  s += `<circle cx="${c}" cy="${c}" r="5.5" fill="#E89E34"/>`;
+  s += creature(c, c + R + 2, 1.7);
+  frame('d', s);
+}
+</script>
+</body>
+</html>

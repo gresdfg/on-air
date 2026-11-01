@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<title>小人 · 终端小样</title>
+<style>
+  html, body { margin: 0; height: 100%; }
+  body {
+    background: #F6F0E4;
+    font-family: Georgia, "FangSong", SimSun, serif;
+    color: #3B342C;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 26px 34px;
+    padding: 20px;
+    flex-wrap: wrap;
+    max-width: 620px;
+    margin: 0 auto;
+  }
+  figure { margin: 0; text-align: center; }
+  svg { display: block; }
+  figcaption {
+    margin-top: 12px;
+    font-size: 13px;
+    letter-spacing: 0.06em;
+    color: rgba(59, 52, 44, 0.6);
+  }
+  .blink { animation: bob 1.1s steps(1) infinite; }
+  @keyframes bob { 0%, 50% { opacity: 1; } 50.01%, 100% { opacity: 0; } }
+</style>
+</head>
+<body>
+  <figure>
+    <svg width="230" height="230" viewBox="-22 -18 44 44">
+      <g fill="#CE8A6D">
+        <rect x="-8" y="-6" width="16" height="12" rx="1"/>
+        <rect x="-13" y="-2" width="5" height="4"/>
+        <rect x="8" y="-2" width="5" height="4"/>
+        <rect x="-6" y="6" width="4" height="6"/>
+        <rect x="-2" y="6" width="4" height="6"/>
+        <rect x="2" y="6" width="4" height="6"/>
+      </g>
+      <g fill="#4A3A30">
+        <rect x="-5" y="-3" width="3" height="3"/>
+        <rect x="2" y="-3" width="3" height="3"/>
+      </g>
+    </svg>
+    <figcaption>0 · 现在这样</figcaption>
+  </figure>
+
+  <figure>
+    <svg width="230" height="230" viewBox="-22 -18 44 44">
+      <g fill="#CE8A6D">
+        <rect x="-13" y="-2" width="5" height="4"/>
+        <rect x="8" y="-2" width="5" height="4"/>
+        <rect x="-6" y="6" width="4" height="6"/>
+        <rect x="-2" y="6" width="4" height="6"/>
+        <rect x="2" y="6" width="4" height="6"/>
+      </g>
+      <rect x="-8" y="-6" width="16" height="12" rx="1" fill="#20241F"/>
+      <text x="-6" y="2.2" font-family="Consolas, monospace" font-size="4.6" fill="#CE8A6D">&gt;</text>
+      <rect class="blink" x="-3.4" y="-1.4" width="3.2" height="3.6" fill="#CE8A6D"/>
+    </svg>
+    <figcaption>1 · 脸变成终端：一个提示符 + 光标</figcaption>
+  </figure>
+
+  <figure>
+    <svg width="230" height="230" viewBox="-22 -18 44 44">
+      <g fill="#CE8A6D">
+        <rect x="-13" y="-2" width="5" height="4"/>
+        <rect x="8" y="-2" width="5" height="4"/>
+        <rect x="-6" y="6" width="4" height="6"/>
+        <rect x="-2" y="6" width="4" height="6"/>
+        <rect x="2" y="6" width="4" height="6"/>
+      </g>
+      <rect x="-8" y="-6" width="16" height="12" rx="1" fill="#20241F"/>
+      <rect x="-8" y="-6" width="16" height="3.2" rx="1" fill="#2E332C"/>
+      <circle cx="-5.6" cy="-4.4" r="0.7" fill="#8A6A4C"/>
+      <circle cx="-3.4" cy="-4.4" r="0.7" fill="#8A6A4C"/>
+      <text x="-6" y="3.4" font-family="Consolas, monospace" font-size="3.4" fill="#D9C9A8">$ _</text>
+    </svg>
+    <figcaption>2 · 变成一台小终端窗口</figcaption>
+  </figure>
+
+  <figure>
+    <svg width="230" height="230" viewBox="-22 -18 44 44">
+      <g fill="#CE8A6D">
+        <rect x="-8" y="-6" width="16" height="12" rx="1"/>
+        <rect x="-13" y="-2" width="5" height="4"/>
+        <rect x="8" y="-2" width="5" height="4"/>
+        <rect x="-6" y="6" width="4" height="6"/>
+        <rect x="-2" y="6" width="4" height="6"/>
+        <rect x="2" y="6" width="4" height="6"/>
+      </g>
+      <rect x="-5" y="-3" width="3" height="3" fill="#20241F"/>
+      <rect class="blink" x="1.4" y="-3" width="3.4" height="3" fill="#20241F"/>
+    </svg>
+    <figcaption>3 · 只把一只眼换成光标</figcaption>
+  </figure>
+</body>
+</html>

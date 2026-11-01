@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<title>脚印 × 光球 · 小样</title>
+<style>
+  html, body { margin: 0; height: 100%; }
+  body {
+    background: #F6F0E4;
+    font-family: Georgia, "FangSong", SimSun, serif;
+    color: #3B342C;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 26px 36px;
+    flex-wrap: wrap;
+    padding: 16px;
+    max-width: 620px;
+    margin: 0 auto;
+  }
+  figure { margin: 0; text-align: center; }
+  svg { display: block; }
+  figcaption {
+    margin-top: 9px;
+    font-size: 12.5px;
+    line-height: 1.5;
+    color: rgba(59, 52, 44, 0.62);
+  }
+</style>
+</head>
+<body>
+  <figure><div id="a"></div><figcaption>A · 环形脚印，亮的一段在走</figcaption></figure>
+  <figure><div id="b"></div><figcaption>B · 小人跟在亮段后面</figcaption></figure>
+  <figure><div id="c"></div><figcaption>C · 脚印往外走</figcaption></figure>
+  <figure><div id="d"></div><figcaption>D · 小人站着，脚印往画面外延伸</figcaption></figure>
+
+<script>
+const S = 230;
+const CRE = '#CE8A6D';
+const CRE_DARK = '#B9785C';
+const EYE = '#3E322B';
+const GOLD = '#DFA65E';
+
+function shadow(cx, cy, rx, op = 0.12) {
+  return `<ellipse cx="${cx}" cy="${cy}" rx="${rx}" ry="${rx * 0.26}" fill="rgba(120,90,60,${op})"/>`;
+}
+
+// 精修版小人
+function creature(cx, cy, s, opts = {}) {
+  const arms = opts.arms || 'side';
+  let g = `<g transform="translate(${cx} ${cy}) scale(${s})">`;
+  g += shadow(0, 13.5, 9, 0.14);
+  g += `<g fill="${CRE}">`;
+  g += `<rect x="-7.6" y="-6" width="15.2" height="12" rx="2.2"/>`;
+  if (arms === 'side') g += `<rect x="-11.6" y="-1.6" width="4.4" height="3.6" rx="1.4"/><rect x="7.2" y="-1.6" width="4.4" height="3.6" rx="1.4"/>`;
+  if (arms === 'back') g += `<rect x="-11" y="-1" width="3.6" height="3.2" rx="1.2"/><rect x="7.4" y="-1" width="3.6" height="3.2" rx="1.2"/>`;
+  g += `<rect x="-5.6" y="6" width="3.4" height="6.4" rx="1.5"/>`;
+  g += `<rect x="-1.7" y="6" width="3.4" height="6.4" rx="1.5"/>`;
+  g += `<rect x="2.2" y="6" width="3.4" height="6.4" rx="1.5"/>`;
+  g += '</g>';
+  // 高光
+  g += `<rect x="-6.4" y="-5.2" width="12.8" height="3.6" rx="1.8" fill="#FFFFFF" opacity="0.14"/>`;
+  // 眼睛
+  g += `<rect x="-4.9" y="-2.6" width="3" height="3" rx="0.8" fill="${EYE}"/>`;
+  g += `<rect x="1.9" y="-2.6" width="3" height="3" rx="0.8" fill="${EYE}"/>`;
+  g += `<rect x="-4.3" y="-2" width="1" height="1" rx="0.5" fill="#FFFFFF" opacity="0.55"/>`;
+  g += `<rect x="2.5" y="-2" width="1" height="1" rx="0.5" fill="#FFFFFF" opacity="0.55"/>`;
+  g += '</g>';
+  return g;
+}
+
+function frame(id, inner) {
+  document.getElementById(id).innerHTML = `<svg width="${S}" height="${S}" viewBox="0 0 ${S} ${S}">
+    <defs>
+      <radialGradient id="g${id}">
+        <stop offset="0%" stop-color="rgba(246,190,110,0.8)"/>
+        <stop offset="40%" stop-color="rgba(244,186,110,0.3)"/>
+        <stop offset="100%" stop-color="rgba(244,186,110,0)"/>
+      </radialGradient>
+    </defs>
+    ${inner}
+  </svg>`;
+}
+
+// 环形脚印
+function ringFeet(c, R, n, litStart, litLen) {
+  let s = '';
+  for (let i = 0; i < n; i++) {
+    const a = (i / n) * Math.PI * 2 - Math.PI / 2;
+    const off = i % 2 ? 5 : -5;
+    const rr = R + off;
+    const x = c + Math.cos(a) * rr;
+    const y = c + Math.sin(a) * rr;
+    const rot = (a * 180) / Math.PI + 90 + (i % 2 ? 12 : -12);
+    let k = (i - litStart + n) % n;
+    const lit = litLen > 0 && k < litLen;
+    const fade = litLen > 0 && k < litLen ? 1 - k / (litLen * 1.6) : 0;
+    const op = lit ? 0.5 + 0.5 * fade : 0.3;
+    const col = lit ? GOLD : '#C8B79A';
+    s += `<g transform="translate(${x.toFixed(1)} ${y.toFixed(1)}) rotate(${rot.toFixed(1)})" opacity="${op.toFixed(2)}">
+      <rect x="-4.2" y="-2" width="8.4" height="4" rx="2" fill="${col}"/>
+      <rect x="-3" y="2.4" width="6" height="2.4" rx="1.2" fill="${col}" opacity="0.85"/>
+    </g>`;
+  }
+  return s;
+}
+
+// A
+{
+  const c = S / 2;
+  let s = `<circle cx="${c}" cy="${c}" r="84" fill="url(#ga)"/>`;
+  s += `<circle cx="${c}" cy="${c}" r="6" fill="#E89E34"/>`;
+  s += ringFeet(c, 62, 28, 5, 5);
+  frame('a', s);
+}
+
+// B —— 小人在亮段末尾
+{
+  const c = S / 2, R = 62, n = 28;
+  const idx = 8;
+  const a = (idx / n) * Math.PI * 2 - Math.PI / 2;
+  const fx = c + Math.cos(a) * R;
+  const fy = c + Math.sin(a) * R;
+  let s = `<circle cx="${c}" cy="${c}" r="84" fill="url(#gb)"/>`;
+  s += `<circle cx="${c}" cy="${c}" r="6" fill="#E89E34"/>`;
+  s += ringFeet(c, R, n, idx, 6);
+  s += creature(fx, fy - 6, 1.55);
+  frame('b', s);
+}
+
+// C —— 脚印往外走（左右两列，越远越淡）
+{
+  const c = S / 2;
+  let s = `<circle cx="${c}" cy="${c}" r="84" fill="url(#gc)"/>`;
+  s += `<circle cx="${c}" cy="${c}" r="6" fill="#E89E34"/>`;
+  for (let k = 0; k < 11; k++) {
+    const r0 = 30 + k * 8.5;
+    const side = k % 2 ? 1 : -1;
+    const ang = (-90 + side * 16) * Math.PI / 180;
+    const x = c + Math.cos(ang) * r0;
+    const y = c + Math.sin(ang) * r0;
+    const op = 0.62 - k * 0.045;
+    const rot = (side * 16) + 90 + side * 14;
+    s += `<g transform="translate(${x.toFixed(1)} ${y.toFixed(1)}) rotate(${rot.toFixed(1)})" opacity="${op.toFixed(2)}">
+      <rect x="-4" y="-2" width="8" height="4" rx="2" fill="${GOLD}"/>
+      <rect x="-2.8" y="2.4" width="5.6" height="2.2" rx="1.1" fill="${GOLD}" opacity="0.85"/>
+    </g>`;
+  }
+  s += `<g opacity="0.35"><circle cx="${c}" cy="${c}" r="26" fill="none" stroke="${GOLD}" stroke-width="1" stroke-dasharray="2 6"/></g>`;
+  frame('c', s);
+}
+
+// D —— 小人站在环上，脚印朝画面外走
+{
+  const c = S / 2, R = 58;
+  let s = `<circle cx="${c}" cy="${c}" r="80" fill="url(#gd)"/>`;
+  s += `<circle cx="${c}" cy="${c}" r="5.5" fill="#E89E34"/>`;
+  s += ringFeet(c, R, 28, 0, 0);
+  // 从底部往外延伸的脚印
+  for (let k = 0; k < 6; k++) {
+    const y = c + R + 12 + k * 9;
+    const x = c + (k % 2 ? 5 : -5);
+    const op = 0.62 - k * 0.08;
+    s += `<g transform="translate(${x} ${y}) rotate(${k % 2 ? 8 : -8})" opacity="${op.toFixed(2)}">
+      <rect x="-3" y="-1.5" width="6" height="3" rx="1.5" fill="${GOLD}"/>
+    </g>`;
+  }
+  s += creature(c, c + R - 4, 1.5);
+  frame('d', s);
+}
+</script>
+</body>
+</html>
